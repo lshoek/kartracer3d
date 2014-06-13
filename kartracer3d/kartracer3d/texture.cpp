@@ -22,7 +22,6 @@ texture::texture(const string fname, const GLenum txfltr)
 {
 	filename = fname.c_str();
 	txfiltering = txfltr;
-	//int bpp = 32;
 	stbi_uc* img = stbi_load(filename, &width, &height, NULL, 4);
 	image = img;
 	textureId = 0;
@@ -39,6 +38,8 @@ GLuint texture::getTextureId()
 	{
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, txfiltering);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, txfiltering);
 		glTexImage2D(GL_TEXTURE_2D,
 			0,					//level
 			GL_RGBA,			//internal format
@@ -48,10 +49,6 @@ GLuint texture::getTextureId()
 			GL_RGBA,			//data format
 			GL_UNSIGNED_BYTE,	//data type
 			image);				//data
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, txfiltering);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, txfiltering);
 	}
 	return textureId;
 }

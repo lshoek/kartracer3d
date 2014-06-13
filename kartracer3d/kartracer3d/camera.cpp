@@ -5,11 +5,10 @@
 #include <sstream>
 #include <glut.h>
 #include "camera.h"
+#define PI 3.14159265358979323846
 
 using namespace std;
 
-#define M_PI 3.14159265358979323846
-#define M_PI_2 3.14159265358979323846*2
 
 void camera::init()
 {
@@ -39,7 +38,7 @@ void camera::refresh()
 	//speed
 	if (spd > 0.001 && !isMoving) spd *= spd_dec;
 
-	if (prev_spd > spd && spd < 0.01) spd = 0;
+	if (prev_spd > spd && spd < 0.1) spd = 0;
 	else if (spd > max_spd) spd = max_spd;
 	prev_spd = spd;
 
@@ -115,7 +114,7 @@ void camera::rotateYaw(float angle)
 
 void camera::rotatePitch(float angle)
 {
-	const float limit = 89.0 * M_PI / 180.0;
+	const float limit = 89.0 * PI / 180.0;
 
 	m_pitch += angle;
 

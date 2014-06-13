@@ -1,19 +1,12 @@
-#include <string>
-#include <iostream>
-#include <vector>
-#include <glut.h>
 #include "game.h"
-#include "font.h"
-#include "texture.h"
-#include "player.h"
-#include "camera.h"
-
 using namespace std;
 
 game* game_g = NULL;
 GLuint char_list, current_texture;
 pair<texture*, texture*> crs_textures[6];
+texture* other_textures[4];
 texture classicfnt_texture{ "resources/classicfnt32.png", GL_NEAREST };
+vector<drawobj*> billBoards;
 camera cam;
 bool key_up, key_down, key_left, key_right;
 float ORG[3] = { 0, 0, 0 }, XP[3] = { 1, 0, 0 }, YP[3] = { 0, 1, 0 }, ZP[3] = { 0, 0, 1 };
@@ -79,7 +72,16 @@ game::game()
 	p->rotation = 0;
 
 	//Init crs_textures
-	init_crs_textures();
+	init_textures();
+
+	//Init drawobjs
+	for (int i = 0; i <= 10; i++)
+	{
+		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[0], 2, 2));
+		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[1], 10, 10));
+		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[2], 10, 10));
+		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[3], 6, 10));
+	}
 
 	//Register callbacks
 	glutIdleFunc(&idleFunc);
@@ -92,15 +94,22 @@ game::game()
 game::~game()
 {}
 
-void game::init_crs_textures()
+void game::init_textures()
 {
-	crs_textures[0] = (pair<texture*, texture*>((new texture("resources/donutplainsgba_bg.png", GL_NEAREST)), (new texture("resources/donutplainsgba_track.png", GL_NEAREST))));
-	crs_textures[1] = (pair<texture*, texture*>((new texture("resources/mariocircuit_bg.png", GL_NEAREST)), (new texture("resources/mariocircuit_track.png", GL_NEAREST))));
-	crs_textures[2] = (pair<texture*, texture*>((new texture("resources/ghostvalley_bg.png", GL_NEAREST)), (new texture("resources/ghostvalley_track.png", GL_NEAREST))));
-	crs_textures[3] = (pair<texture*, texture*>((new texture("resources/luigicircuit_bg.png", GL_NEAREST)), (new texture("resources/luigicircuit_track.png", GL_NEAREST))));
-	crs_textures[4] = (pair<texture*, texture*>((new texture("resources/castle_bg.png", GL_NEAREST)), (new texture("resources/mariocircuit1_track.png", GL_NEAREST))));
-	crs_textures[5] = (pair<texture*, texture*>((new texture("resources/chocoisland2_bg.png", GL_NEAREST)), (new texture("resources/chocoisland2_track.png", GL_NEAREST))));
+	GLenum filtering = GL_NEAREST;
+	crs_textures[0] = (pair<texture*, texture*>((new texture("resources/donutplainsgba_bg.png", filtering)), (new texture("resources/donutplainsgba_track.png", filtering))));
+	crs_textures[1] = (pair<texture*, texture*>((new texture("resources/mariocircuit_bg.png", filtering)), (new texture("resources/mariocircuit_track.png", filtering))));
+	crs_textures[2] = (pair<texture*, texture*>((new texture("resources/ghostvalley_bg.png", filtering)), (new texture("resources/ghostvalley_track.png", filtering))));
+	crs_textures[3] = (pair<texture*, texture*>((new texture("resources/luigicircuit_bg.png", filtering)), (new texture("resources/luigicircuit_track.png", filtering))));
+	crs_textures[4] = (pair<texture*, texture*>((new texture("resources/castle_bg.png", filtering)), (new texture("resources/peachcircuit_track.png", filtering))));
+	crs_textures[5] = (pair<texture*, texture*>((new texture("resources/chocoisland2_bg.png", filtering)), (new texture("resources/chocoisland2_track.png", filtering))));
+
+	other_textures[0] = new texture("resources/banana.png", filtering);
+	other_textures[1] = new texture("resources/tree1.png", filtering);
+	other_textures[2] = new texture("resources/tree3.png", filtering);
+	other_textures[3] = new texture("resources/tree4.png", filtering);
 }
+
 void game::update()
 {
 	int time = glutGet(GLUT_ELAPSED_TIME);
@@ -127,12 +136,23 @@ void game::draw()
 	//Perspective
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(20, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000);
+	gluPerspective(60, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	cam.refresh();
 	drawStage(0, 0, 0);
+
+	float cx, cy, cz;
+	cam.getPos(cx, cy, cz);
+
+	//bananas
+	drawBillboards(billBoards);
+
 	glDisable(GL_DEPTH_TEST);
 	drawAxes();
 
@@ -154,8 +174,6 @@ void game::drawText(const string text, const GLfloat x, const GLfloat y, const i
 	current_texture = classicfnt_texture.getTextureId();
 	glBindTexture(GL_TEXTURE_2D, current_texture);
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glTranslatef(x, y, 0);
 	glScalef(scale, scale, 1);
@@ -175,7 +193,10 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 {
 	glPushMatrix();
 	glTranslatef(idx, idy, idz);
-	glScalef(200, 20, 200);
+	if (txtrindex == 1 || txtrindex == 3 || txtrindex == 4)
+		glScalef(300, 40, 300);
+	else
+		glScalef(200, 30, 200);
 	glEnable(GL_TEXTURE_2D);
 
 	//track
@@ -240,6 +261,12 @@ void game::drawAxes()
 	glVertex3fv(ZP);
 	glEnd();
 	glPopMatrix();
+}
+
+void game::drawBillboards(vector<drawobj*> vec)
+{
+	for (drawobj* d : vec)
+		d->draw();
 }
 
 void game::kDown(unsigned char key, int x, int y)

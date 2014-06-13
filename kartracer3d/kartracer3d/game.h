@@ -2,10 +2,15 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <glut.h>
+#include "math.h"
 #include "font.h"
 #include "texture.h"
-#define SCRN_WIDTH	1280
+#include "player.h"
+#include "camera.h"
+#include "drawobj.h"
+#include <glut.h>
+#define PI 3.14159265359
+#define SCRN_WIDTH	1366
 #define SCRN_HEIGHT	720
 
 class game
@@ -13,12 +18,13 @@ class game
 public:
 	game();
 	~game();
-	void init_crs_textures();
+	void init_textures();
 	void update();
 	void draw();
 	void drawText(const string, const GLfloat, const GLfloat, const int);
+	void drawBillboards(vector<drawobj*>);
 	void drawStage(GLfloat, GLfloat, GLfloat);
-	void drawAxes();
+	void drawAxes(); 
 	void kDown(unsigned char key, int x, int y);
 	void kUp(unsigned char key, int x, int y);
 };
