@@ -16,6 +16,7 @@
     <ClCompile Include="font.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="glyph.cpp" />
+    <ClCompile Include="ObjectLoader.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="program.cpp" />
     <ClCompile Include="stb_image.c" />
@@ -27,6 +28,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="glyph.h" />
+    <ClInclude Include="ObjectLoader.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="program.h" />
     <ClInclude Include="stb_image.h" />

@@ -8,6 +8,7 @@
 #include "player.h"
 #include "camera.h"
 #include "drawobj.h"
+#include "ObjectLoader.h"
 #include <glut.h>
 #define PI 3.14159265359
 #define SCRN_WIDTH	1366
@@ -23,6 +24,8 @@ public:
 	void draw();
 	void drawText(const string, const GLfloat, const GLfloat, const int);
 	void drawBillboards(vector<drawobj*>);
+	void drawPlayer(GLfloat idx, GLfloat idy, int width, int height);
+	void drawCar(GLfloat idx, GLfloat idy, GLfloat idz);
 	void drawStage(GLfloat, GLfloat, GLfloat);
 	void drawAxes(); 
 	void kDown(unsigned char key, int x, int y);

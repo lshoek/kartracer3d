@@ -2,15 +2,18 @@
 using namespace std;
 
 game* game_g = NULL;
+ObjModel* objm;
 GLuint char_list, current_texture;
 pair<texture*, texture*> crs_textures[6];
+texture* player_textures[3];
 texture* other_textures[4];
 texture classicfnt_texture{ "resources/classicfnt32.png", GL_NEAREST };
+texture water_texture{ "resources/water_ug.png", GL_NEAREST };
 vector<drawobj*> billBoards;
 camera cam;
 bool key_up, key_down, key_left, key_right;
 float ORG[3] = { 0, 0, 0 }, XP[3] = { 1, 0, 0 }, YP[3] = { 0, 1, 0 }, ZP[3] = { 0, 0, 1 };
-int lastFrameTime = 0, txtrindex = 0;
+int lastFrameTime = 0, txtrindex = 0, player_index = 2, last_player_index = 2;
 
 void idleFunc()
 {
@@ -77,11 +80,17 @@ game::game()
 	//Init drawobjs
 	for (int i = 0; i <= 10; i++)
 	{
-		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[0], 2, 2));
-		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[1], 10, 10));
-		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[2], 10, 10));
-		billBoards.push_back(new drawobj(rand() % 200, 0, rand() % 200, other_textures[3], 6, 10));
+		billBoards.push_back(new drawobj(rand() % 300, 0, rand() % 300, other_textures[0], 2, 2));
+		billBoards.push_back(new drawobj(rand() % 300, 0, rand() % 300, other_textures[1], 10, 10));
+		billBoards.push_back(new drawobj(rand() % 300, 0, rand() % 300, other_textures[2], 6, 10));
+		billBoards.push_back(new drawobj(rand() % 300, 0, rand() % 300, other_textures[3], 6, 10));
 	}
+
+	player_textures[0] = new texture("resources/player/player-1.png", GL_NEAREST);
+	player_textures[1] = new texture("resources/player/player0.png", GL_NEAREST);
+	player_textures[2] = new texture("resources/player/player1.png", GL_NEAREST);
+
+	objm = new ObjModel("resources/models/simplecar.obj");
 
 	//Register callbacks
 	glutIdleFunc(&idleFunc);
@@ -115,13 +124,23 @@ void game::update()
 	int time = glutGet(GLUT_ELAPSED_TIME);
 	cam.passTimeFac((time - lastFrameTime) / 1000.0);
 	lastFrameTime = time;
+	player_index = 1;
 
 	if (key_up)
 		cam.move();
-	if (key_left)
+	if (key_left) 
+	{
 		cam.rotateYaw(-1);
-	if (key_right)
-		cam.rotateYaw(1);
+		if (last_player_index <= 1)
+			player_index = 0;
+	}
+	else if (key_right) 
+	{
+		cam.rotateYaw(1); 
+		if (last_player_index >= 1)
+			player_index = 2;
+	}
+	last_player_index = player_index;
 	glutPostRedisplay();
 }
 
@@ -130,13 +149,26 @@ void game::draw()
 	glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
 
-	glClearColor(0, 0, 0, 1);
+	//clearcolors
+	if (txtrindex == 0) //donutplains
+		glClearColor(255 / 255.0, 191 / 255.0, 80 / 255.0, 1);
+	else if (txtrindex == 1) //mariocircuit
+		glClearColor(160 / 255.0, 240 / 255.0, 255 / 255.0, 1);
+	else if (txtrindex == 2) //ghostvalley
+		glClearColor(128 / 255.0, 144 / 255.0, 176 / 255.0, 1);
+	else if (txtrindex == 3) //luigicircuit
+		glClearColor(176 / 255.0, 191 / 255.0, 1, 1);
+	else if (txtrindex == 4) //castle
+		glClearColor(15 / 255.0, 159 / 255.0, 255 / 255.0, 1);
+	else if (txtrindex == 5) //chocoisland
+		glClearColor(223 / 255.0, 0, 96 / 255.0, 1);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Perspective
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000);
+	gluPerspective(70, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000); //fov default 60
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_GREATER, 0.5);
@@ -146,15 +178,11 @@ void game::draw()
 	glLoadIdentity();
 	cam.refresh();
 	drawStage(0, 0, 0);
-
-	float cx, cy, cz;
-	cam.getPos(cx, cy, cz);
+	drawCar(100, 1, 100);
 
 	//bananas
-	drawBillboards(billBoards);
-
-	glDisable(GL_DEPTH_TEST);
-	drawAxes();
+	if (txtrindex != 2)
+		drawBillboards(billBoards);
 
 	//Orthogonal
 	glMatrixMode(GL_PROJECTION);
@@ -163,8 +191,8 @@ void game::draw()
 	glOrtho(0, SCRN_WIDTH, 0, SCRN_HEIGHT, -1, 200);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	drawPlayer(SCRN_WIDTH / 2, SCRN_HEIGHT*0.25, 100, 100);
 	drawText("opengl 3d graphics demo", 10, 10, 2);
-
 	drawText(cam.getVars(), 10, 20, 2);
 	glutSwapBuffers();
 }
@@ -189,15 +217,60 @@ void game::drawText(const string text, const GLfloat x, const GLfloat y, const i
 	glPopMatrix();
 }
 
+void game::drawPlayer(GLfloat idx, GLfloat idy, int width, int height)
+{
+	current_texture = player_textures[player_index]->getTextureId();
+	glBindTexture(GL_TEXTURE_2D, current_texture);
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(idx-width, idy+height, 0);
+	glScalef(2, -2, 1);
+	glColor4f(1, 1, 1, 1);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);		glVertex2d(0, 0);
+	glTexCoord2f(0, 1);		glVertex2d(0, height);
+	glTexCoord2f(1, 1);		glVertex2d(width, height);
+	glTexCoord2f(1, 0);		glVertex2d(width, 0);
+	glEnd();
+
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+}
+
+void game::drawCar(GLfloat idx, GLfloat idy, GLfloat idz)
+{
+	glPushMatrix();
+	glTranslatef(idx, idy, idz);
+	glScalef(5, 5, 5);
+	glEnable(GL_TEXTURE_2D);
+	objm->draw();
+	glPopMatrix();
+}
+
 void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 {
 	glPushMatrix();
 	glTranslatef(idx, idy, idz);
-	if (txtrindex == 1 || txtrindex == 3 || txtrindex == 4)
+	if (txtrindex == 1 || txtrindex == 2 || txtrindex == 4)
 		glScalef(300, 40, 300);
+	else if (txtrindex == 3)
+		glScalef(400, 60, 400);
 	else
 		glScalef(200, 30, 200);
 	glEnable(GL_TEXTURE_2D);
+
+	if (txtrindex == 0)
+	{
+		//add water
+		glBindTexture(GL_TEXTURE_2D, water_texture.getTextureId());
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0); glVertex3f(-0.5,	-0.075,	-0.5);
+		glTexCoord2f(0, 1); glVertex3f(1,		-0.075,	-0.5);
+		glTexCoord2f(1, 1); glVertex3f(1,		-0.075,	1.5);
+		glTexCoord2f(1, 0); glVertex3f(-0.5,	-0.075,	1.5);
+		glEnd();
+	}
 
 	//track
 	current_texture = crs_textures[txtrindex].second->getTextureId();
@@ -209,6 +282,8 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	glTexCoord2f(1, 0); glVertex3f(0, 0, 1);
 	glEnd();
 
+	if (txtrindex == 2)
+		glTranslatef(0, -0.4, 0);
 	//bg
 	current_texture = crs_textures[txtrindex].first->getTextureId();
 	glBindTexture(GL_TEXTURE_2D, current_texture);
@@ -220,11 +295,11 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	glTexCoord2f(1, 1); glVertex3f(1, 0, 0);
 	glEnd();
 
-	glBegin(GL_QUADS);
-	glTexCoord2f(0, 1); glVertex3f(0, 0, 0);
-	glTexCoord2f(0, 0); glVertex3f(0, 2, 0);
-	glTexCoord2f(1, 0); glVertex3f(0, 2, 1);
-	glTexCoord2f(1, 1); glVertex3f(0, 0, 1);
+	glBegin(GL_QUADS); //flip!!
+	glTexCoord2f(0, 1); glVertex3f(0, 0, 1);
+	glTexCoord2f(0, 0); glVertex3f(0, 2, 1);
+	glTexCoord2f(1, 0); glVertex3f(0, 2, 0);
+	glTexCoord2f(1, 1); glVertex3f(0, 0, 0);
 	glEnd();
 
 	glBegin(GL_QUADS);

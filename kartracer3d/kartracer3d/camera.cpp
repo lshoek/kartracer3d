@@ -9,12 +9,11 @@
 
 using namespace std;
 
-
 void camera::init()
 {
-	m_yaw = 0.0;
+	m_yaw = 3.0;
 	m_pitch = 0.0;
-	setPos(35, 2, 12);
+	setPos(120, 2, 20);
 }
 
 void camera::refresh()
@@ -39,7 +38,7 @@ void camera::refresh()
 	if (spd > 0.001 && !isMoving) spd *= spd_dec;
 
 	if (prev_spd > spd && spd < 0.1) spd = 0;
-	else if (spd > max_spd) spd = max_spd;
+	else if (spd >= max_spd) spd = max_spd;
 	prev_spd = spd;
 
 	//magic
@@ -88,7 +87,7 @@ void camera::getDirectionVector(float &x, float &y, float &z)
 string camera::getVars()
 {
 	stringstream strs;
-	strs << "spd=" << spd << " rotation_spd=" << rotation_spd << endl;
+	strs << "Speed:" << (int)spd << endl;
 	return strs.str();
 }
 

@@ -13,8 +13,6 @@ class font
 {
 private:
 	void printFontData();
-	string replace(string str, string toReplace, string replacement);
-	vector<string> split(string str, string sep);
 
 public:
 	map<char, glyph> charmap;
@@ -22,6 +20,8 @@ public:
 	font(const string fname);
 	font();
 	~font();
+	string replace(string str, string toReplace, string replacement);
+	vector<string> split(string str, string sep);
 };
 
 

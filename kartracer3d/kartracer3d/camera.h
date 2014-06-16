@@ -27,23 +27,23 @@ public:
 	void rotateYaw(float angle);
 	void rotatePitch(float angle);
 
+	float m_yaw, m_pitch;
+	float rotation_spd_r = 0;
+	float rotation_spd_l = 0;
+	float rotation_spd = 0;
+	const float rotation_max_spd = 2.5;
+
    private:
 	bool isMoving = false;
 	float tfac;
 
 	float spd = 0;
 	float prev_spd;
-	const float max_spd = 50;
+	const float max_spd = 50.0;
 	const float spd_acc = 0.1;
 	const float spd_dec = 0.990;
-
-	float rotation_spd_r = 0;
-	float rotation_spd_l = 0;
-	float rotation_spd = 0;
-	const float rotation_max_spd = 2.5;
 	const float rotation_acc = 0.04;
 
 	float m_x, m_y, m_z;
 	float m_lx, m_ly, m_lz;
-	float m_yaw, m_pitch;
 };
