@@ -165,6 +165,30 @@ void game::draw()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//Lightning
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_AMBIENT_AND_DIFFUSE, GL_EMISSION);
+
+	float cx, cy, cz;
+	cam.getPos(cx, cy, cz);
+	GLfloat LightPosition[] = { cx, cy+100.0, cz };
+	//GLfloat LightPosition[] = { 1.0f, 1.0f, 0 };
+	GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
+	GLfloat LightDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat LightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
+
+	GLfloat LightModelAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat MaterialSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat MaterialEmission[] = { 0, 0, 0, 1.0f };
+	glLightModelfv(GL_AMBIENT, LightModelAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, MaterialSpecular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, MaterialEmission);
+
 	//Perspective
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -180,9 +204,11 @@ void game::draw()
 	drawStage(0, 0, 0);
 	drawCar(100, 1, 100);
 
-	//bananas
+	//Obstacles
+	glEnable(GL_LIGHTING);
 	if (txtrindex != 2)
 		drawBillboards(billBoards);
+	glDisable(GL_LIGHTING);
 
 	//Orthogonal
 	glMatrixMode(GL_PROJECTION);
@@ -228,6 +254,7 @@ void game::drawPlayer(GLfloat idx, GLfloat idy, int width, int height)
 	glColor4f(1, 1, 1, 1);
 
 	glBegin(GL_QUADS);
+	glNormal3f(0, 0, 1);
 	glTexCoord2f(0, 0);		glVertex2d(0, 0);
 	glTexCoord2f(0, 1);		glVertex2d(0, height);
 	glTexCoord2f(1, 1);		glVertex2d(width, height);
@@ -259,16 +286,17 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	else
 		glScalef(200, 30, 200);
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
 
 	if (txtrindex == 0)
 	{
 		//add water
 		glBindTexture(GL_TEXTURE_2D, water_texture.getTextureId());
 		glBegin(GL_QUADS);
-		glTexCoord2f(0, 0); glVertex3f(-0.5,	-0.075,	-0.5);
-		glTexCoord2f(0, 1); glVertex3f(1,		-0.075,	-0.5);
-		glTexCoord2f(1, 1); glVertex3f(1,		-0.075,	1.5);
-		glTexCoord2f(1, 0); glVertex3f(-0.5,	-0.075,	1.5);
+		glTexCoord2f(0, 0); glVertex3f(-0.5, -0.075, -0.5);
+		glTexCoord2f(0, 1); glVertex3f(1, -0.075, -0.5);
+		glTexCoord2f(1, 1); glVertex3f(1, -0.075, 2.0);
+		glTexCoord2f(1, 0); glVertex3f(-0.5, -0.075, 2.0);
 		glEnd();
 	}
 
@@ -281,6 +309,7 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	glTexCoord2f(1, 1); glVertex3f(1, 0, 1);
 	glTexCoord2f(1, 0); glVertex3f(0, 0, 1);
 	glEnd();
+	glDisable(GL_LIGHTING);
 
 	if (txtrindex == 2)
 		glTranslatef(0, -0.4, 0);
@@ -295,11 +324,11 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	glTexCoord2f(1, 1); glVertex3f(1, 0, 0);
 	glEnd();
 
-	glBegin(GL_QUADS); //flip!!
+	glBegin(GL_QUADS); 
 	glTexCoord2f(0, 1); glVertex3f(0, 0, 1);
-	glTexCoord2f(0, 0); glVertex3f(0, 2, 1);
-	glTexCoord2f(1, 0); glVertex3f(0, 2, 0);
-	glTexCoord2f(1, 1); glVertex3f(0, 0, 0);
+	glTexCoord2f(0, 0);	glVertex3f(0, 2, 1);
+	glTexCoord2f(1, 0);	glVertex3f(0, 2, 0);
+	glTexCoord2f(1, 1);	glVertex3f(0, 0, 0);
 	glEnd();
 
 	glBegin(GL_QUADS);

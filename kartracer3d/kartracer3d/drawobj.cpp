@@ -39,10 +39,10 @@ void drawobj::draw()
 	glBindTexture(GL_TEXTURE_2D, t->getTextureId());
 
 	glBegin(GL_QUADS);
-	glTexCoord2f(0, 1); glVertex3f(0, 0, 0);
-	glTexCoord2f(0, 0); glVertex3f(0, height, 0);
-	glTexCoord2f(1, 0); glVertex3f(width, height, 0);
-	glTexCoord2f(1, 1); glVertex3f(width, 0, 0);
+	glTexCoord2f(0, 1); glNormal3f(0, 0, 1); glVertex3f(0, 0, 0);
+	glTexCoord2f(0, 0); glNormal3f(0, 0, 1); glVertex3f(0, height, 0);
+	glTexCoord2f(1, 0); glNormal3f(0, 0, 1); glVertex3f(width, height, 0);
+	glTexCoord2f(1, 1); glNormal3f(0, 0, 1); glVertex3f(width, 0, 0);
 	glEnd();
 
 	glPopMatrix();
