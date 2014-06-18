@@ -28,6 +28,7 @@ public:
 	void drawCar(GLfloat idx, GLfloat idy, GLfloat idz);
 	void drawStage(GLfloat, GLfloat, GLfloat);
 	void drawAxes(); 
+	void drawLine(GLfloat ax, GLfloat ay, GLfloat az, GLfloat bx, GLfloat by, GLfloat bz);
 	void kDown(unsigned char key, int x, int y);
 	void kUp(unsigned char key, int x, int y);
 };

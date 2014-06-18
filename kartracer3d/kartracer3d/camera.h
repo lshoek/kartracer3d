@@ -16,6 +16,7 @@ public:
 	void refresh();
 	void setPos(float x, float y, float z);
 	void getPos(float &x, float &y, float &z);
+	void getPlayerPos(float &, float &, float &);
 	string getVars();
 	void getDirectionVector(float &x, float &y, float &z);
 	void passTimeFac(float tf);

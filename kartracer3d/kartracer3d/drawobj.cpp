@@ -29,7 +29,7 @@ void drawobj::draw()
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			if (i == j)
-				modelview[i * 4 + j] = 1; //treat the 1-dimensional array as a 4x4 array
+				modelview[i * 4 + j] = 1; //treat 1-dimensional array as 4x4 grid
 			else
 				modelview[i * 4 + j] = 0;
 		}
@@ -39,10 +39,11 @@ void drawobj::draw()
 	glBindTexture(GL_TEXTURE_2D, t->getTextureId());
 
 	glBegin(GL_QUADS);
-	glTexCoord2f(0, 1); glNormal3f(0, 0, 1); glVertex3f(0, 0, 0);
-	glTexCoord2f(0, 0); glNormal3f(0, 0, 1); glVertex3f(0, height, 0);
-	glTexCoord2f(1, 0); glNormal3f(0, 0, 1); glVertex3f(width, height, 0);
-	glTexCoord2f(1, 1); glNormal3f(0, 0, 1); glVertex3f(width, 0, 0);
+	glNormal3f(0, 0, 1);
+	glTexCoord2f(0, 1); glVertex3f(0, 0, 0);
+	glTexCoord2f(0, 0); glVertex3f(0, height, 0);
+	glTexCoord2f(1, 0); glVertex3f(width, height, 0);
+	glTexCoord2f(1, 1); glVertex3f(width, 0, 0);
 	glEnd();
 
 	glPopMatrix();

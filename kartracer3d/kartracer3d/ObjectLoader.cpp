@@ -132,9 +132,7 @@ void ObjModel::draw()
 			glBindTexture(GL_TEXTURE_2D, materials[group->materialIndex]->tex->getTextureId());
 		}
 		else
-		{
 			glDisable(GL_TEXTURE_2D);
-		}
 
 		glBegin(GL_TRIANGLES);
 		for (auto face : group->faces)

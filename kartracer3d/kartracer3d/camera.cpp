@@ -18,9 +18,6 @@ void camera::init()
 
 void camera::refresh()
 {
-	//camera parameter according to Riegl's co-ordinate system
-	//x/y for flat, z for height
-
 	//lookat vectors
 	m_lx = cos(m_yaw) * cos(m_pitch);
 	m_ly = sin(m_pitch);
@@ -35,11 +32,21 @@ void camera::refresh()
 	m_z += spd*tfac*lz;
 
 	//speed
-	if (spd > 0.001 && !isMoving) spd *= spd_dec;
+	if (spd > 0.001 && !isMoving) 
+		spd *= spd_dec;
 
-	if (prev_spd > spd && spd < 0.1) spd = 0;
-	else if (spd >= max_spd) spd = max_spd;
-	prev_spd = spd;
+	if (prev_spd > spd && spd < 0.1) 
+		spd = 0;
+	else if (spd >= max_spd) 
+		spd = max_spd;
+
+	////edges
+	//float px, py, pz;
+	//getPlayerPos(px, py, pz);
+
+	//if (px < 0 + 5 || px > 200 - 5 || pz < 0 + 5 || pz > 200 - 5)
+	//	spd = 0;
+	//prev_spd = spd;
 
 	//magic
 	gluLookAt(m_x, m_y, m_z, m_x + m_lx, m_y + m_ly, m_z + m_lz, 0.0, 1.0, 0.0);
@@ -84,10 +91,29 @@ void camera::getDirectionVector(float &x, float &y, float &z)
 	z = m_lz;
 }
 
+void camera::getPlayerPos(float &x, float &y, float &z)
+{
+	float px, py, pz;
+	float dx, dy, dz;
+	getPos(px, py, pz);
+	getPos(dx, dy, dz);
+
+	//Normalize direction vector
+	float pLen = sqrt(dx*dx + dy*dy + dz*dz);
+	dx /= pLen;
+	dy /= pLen;
+	dz /= pLen;
+	x = px + dx*10;
+	y = 0;
+	z = pz + dz*10;
+}
+
 string camera::getVars()
 {
 	stringstream strs;
-	strs << "Speed:" << (int)spd << endl;
+	float px, py, pz;
+	getPlayerPos(px, py, pz);
+	strs << "Speed:" << (int)spd << " pX:" << px << " pZ:" << pz << endl;
 	return strs.str();
 }
 

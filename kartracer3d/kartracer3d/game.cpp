@@ -92,6 +92,13 @@ game::game()
 
 	objm = new ObjModel("resources/models/simplecar.obj");
 
+	//LIGHTING
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE);
+	glShadeModel(GL_SMOOTH);
+
 	//Register callbacks
 	glutIdleFunc(&idleFunc);
 	glutDisplayFunc(&displayFunc);
@@ -147,7 +154,6 @@ void game::update()
 void game::draw()
 {
 	glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
-	glEnable(GL_DEPTH_TEST);
 
 	//clearcolors
 	if (txtrindex == 0) //donutplains
@@ -165,50 +171,50 @@ void game::draw()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Lightning
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_AMBIENT_AND_DIFFUSE, GL_EMISSION);
+	//Blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
 
-	float cx, cy, cz;
-	cam.getPos(cx, cy, cz);
-	GLfloat LightPosition[] = { cx, cy+100.0, cz };
-	//GLfloat LightPosition[] = { 1.0f, 1.0f, 0 };
-	GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
+	//Perspective
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glEnable(GL_DEPTH_TEST);
+	gluPerspective(70, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000); //fov default 60
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	//LIGHTING
+	GLfloat LightPosition[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat LightAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	GLfloat LightDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat LightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat LightSpecular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
 
 	GLfloat LightModelAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-	GLfloat MaterialSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat MaterialSpecular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	GLfloat MaterialEmission[] = { 0, 0, 0, 1.0f };
 	glLightModelfv(GL_AMBIENT, LightModelAmbient);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, MaterialSpecular);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, MaterialEmission);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, MaterialSpecular);
+	glMaterialfv(GL_FRONT, GL_EMISSION, MaterialEmission);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	//Perspective
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(70, SCRN_WIDTH / (float)SCRN_HEIGHT, 1, 1000); //fov default 60
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glAlphaFunc(GL_GREATER, 0.5);
-	glEnable(GL_ALPHA_TEST);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//Cam (gluLookat)
 	cam.refresh();
+
+	//Stage & Car
 	drawStage(0, 0, 0);
 	drawCar(100, 1, 100);
 
 	//Obstacles
-	glEnable(GL_LIGHTING);
 	if (txtrindex != 2)
 		drawBillboards(billBoards);
-	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING); 
 
 	//Orthogonal
 	glMatrixMode(GL_PROJECTION);
@@ -250,11 +256,10 @@ void game::drawPlayer(GLfloat idx, GLfloat idy, int width, int height)
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(idx-width, idy+height, 0);
-	glScalef(2, -2, 1);
-	glColor4f(1, 1, 1, 1);
+	glScalef(2.0, -2.0, 1.0);
+	glColor4f(1.0, 1.0, 1.0, 1.0);
 
 	glBegin(GL_QUADS);
-	glNormal3f(0, 0, 1);
 	glTexCoord2f(0, 0);		glVertex2d(0, 0);
 	glTexCoord2f(0, 1);		glVertex2d(0, height);
 	glTexCoord2f(1, 1);		glVertex2d(width, height);
@@ -270,7 +275,9 @@ void game::drawCar(GLfloat idx, GLfloat idy, GLfloat idz)
 	glPushMatrix();
 	glTranslatef(idx, idy, idz);
 	glScalef(5, 5, 5);
-	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glDisable(GL_TEXTURE_2D);
 	objm->draw();
 	glPopMatrix();
 }
@@ -285,8 +292,10 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 		glScalef(400, 60, 400);
 	else
 		glScalef(200, 30, 200);
-	glEnable(GL_TEXTURE_2D);
+
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_TEXTURE_2D);
 
 	if (txtrindex == 0)
 	{
@@ -309,7 +318,6 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	glTexCoord2f(1, 1); glVertex3f(1, 0, 1);
 	glTexCoord2f(1, 0); glVertex3f(0, 0, 1);
 	glEnd();
-	glDisable(GL_LIGHTING);
 
 	if (txtrindex == 2)
 		glTranslatef(0, -0.4, 0);
@@ -365,6 +373,20 @@ void game::drawAxes()
 	glVertex3fv(ZP);
 	glEnd();
 	glPopMatrix();
+}
+
+void game::drawLine(GLfloat ax, GLfloat ay, GLfloat az, GLfloat bx, GLfloat by, GLfloat bz)
+{
+	glEnable(GL_COLOR);
+	glPushMatrix();
+	glLineWidth(2.0);
+	glBegin(GL_LINES);
+	glColor3f(1, 0, 0); 
+	glVertex3f(ax, ay, az);
+	glVertex3f(bx, by, bz);
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_COLOR);
 }
 
 void game::drawBillboards(vector<drawobj*> vec)
