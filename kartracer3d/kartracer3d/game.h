@@ -5,7 +5,6 @@
 #include "math.h"
 #include "font.h"
 #include "texture.h"
-#include "player.h"
 #include "camera.h"
 #include "drawobj.h"
 #include "ObjectLoader.h"

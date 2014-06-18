@@ -11,7 +11,7 @@ texture classicfnt_texture{ "resources/classicfnt32.png", GL_NEAREST };
 texture water_texture{ "resources/water_ug.png", GL_NEAREST };
 vector<drawobj*> billBoards;
 camera cam;
-bool key_up, key_down, key_left, key_right;
+bool key_up, key_down, key_left, key_right, lighting=true, drawmesh=true;
 float ORG[3] = { 0, 0, 0 }, XP[3] = { 1, 0, 0 }, YP[3] = { 0, 1, 0 }, ZP[3] = { 0, 0, 1 };
 int lastFrameTime = 0, txtrindex = 0, player_index = 2, last_player_index = 2;
 
@@ -65,14 +65,7 @@ game::game()
 		glEnd();
 		glTranslatef(g.xadvance, 0, 0);
 		glEndList();
-	}
-
-	//Player
-	player *p = new player();
-	p->x = 0;
-	p->y = 0;
-	p->z = 0;
-	p->rotation = 0;
+	} 
 
 	//Init crs_textures
 	init_textures();
@@ -209,7 +202,8 @@ void game::draw()
 
 	//Stage & Car
 	drawStage(0, 0, 0);
-	drawCar(100, 1, 100);
+	if (drawmesh)
+		drawCar(100, 1, 100);
 
 	//Obstacles
 	if (txtrindex != 2)
@@ -275,8 +269,7 @@ void game::drawCar(GLfloat idx, GLfloat idy, GLfloat idz)
 	glPushMatrix();
 	glTranslatef(idx, idy, idz);
 	glScalef(5, 5, 5);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+
 	glDisable(GL_TEXTURE_2D);
 	objm->draw();
 	glPopMatrix();
@@ -293,7 +286,8 @@ void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)
 	else
 		glScalef(200, 30, 200);
 
-	glEnable(GL_LIGHTING);
+	if (lighting)
+		glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_TEXTURE_2D);
 
@@ -413,6 +407,12 @@ void game::kDown(unsigned char key, int x, int y)
 		break;
 	case 'c':
 		if (txtrindex < 5) txtrindex++; else txtrindex = 0;
+		break;
+	case 'v':
+		lighting = !lighting;
+		break;
+	case 'x':
+		drawmesh = !drawmesh;
 		break;
 	case 27:
 		exit(0);
