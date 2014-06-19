@@ -12,7 +12,7 @@ texture water_texture{ "resources/water_ug.png", GL_NEAREST };
 vector<drawobj*> billBoards;
 camera cam;
 bool key_up, key_down, key_left, key_right, lighting=true, drawmesh=true;
-float ORG[3] = { 0, 0, 0 }, XP[3] = { 1, 0, 0 }, YP[3] = { 0, 1, 0 }, ZP[3] = { 0, 0, 1 };
+float ORG[3] = { 0, 0, 0 }, XP[3] = { 1, 0, 0 }, YP[3] = { 0, 1, 0 }, ZP[3] = { 0, 0, 1 }, car_rotation = 0;
 int lastFrameTime = 0, txtrindex = 0, player_index = 2, last_player_index = 2;
 
 void idleFunc()
@@ -203,7 +203,7 @@ void game::draw()
 	//Stage & Car
 	drawStage(0, 0, 0);
 	if (drawmesh)
-		drawCar(100, 1, 100);
+		drawCar(80, 1, 80);
 
 	//Obstacles
 	if (txtrindex != 2)
@@ -268,11 +268,19 @@ void game::drawCar(GLfloat idx, GLfloat idy, GLfloat idz)
 {
 	glPushMatrix();
 	glTranslatef(idx, idy, idz);
+
+	glTranslatef(50, 0, -5);
+	glRotatef(-car_rotation, 0, 1, 0);
+	glTranslatef(-50, 0, 5);
 	glScalef(5, 5, 5);
 
 	glDisable(GL_TEXTURE_2D);
 	objm->draw();
 	glPopMatrix();
+
+	car_rotation+= 0.2;
+	if (car_rotation >= 360)
+		car_rotation = 0;
 }
 
 void game::drawStage(GLfloat idx, GLfloat idy, GLfloat idz)

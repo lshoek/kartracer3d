@@ -1,0 +1,26 @@
+kartracer3d by Lesley van Hoek
+
+kartracer3d is a prototype kart racing game. This project was created as an individual assessment for school. This manual quickly explains the controls.
+
+
+## DRIVING CONTROLS ##
+
+SPACE	Accelerate
+A		Turn left
+D		Turn right
+
+## ADDITIONAL CONTROLS ##
+
+X		Toggle rotating car mesh (on/off). Turning off the mesh will increase performance.
+C		Jump to the next course
+V		Toggle lighting (on/off)
+
+
+That's it! There is no point to this demo. Just drive around, enjoy the scenery and have fun!
+
+## DISCLAIMER ##
+
+All scenery and kart textures in this demo are property of Nintendo. The scenery textures are taken from Mario Kart Super Circuit for Gameboy Advance by Nintendo.
+The textures of the controllable controllable kart are taken from Super Mario Kart by Nintendo.
+
+I do not own any of the textures in this project. Only the car model was entirely created by me. This project was exclusively created for learning purposes.
