@@ -14,6 +14,7 @@ D		Turn right
 X		Toggle rotating car mesh (on/off). Turning off the mesh will increase performance.
 C		Jump to the next course
 V		Toggle lighting (on/off)
+ESC		Exit application
 
 
 That's it! There is no point to this demo. Just drive around, enjoy the scenery and have fun!
